@@ -1,0 +1,14 @@
+*******************************************************************************
+*** tcp & tcpm: trivial file copy
+*** Contact: <hshen4@stevens.edu>
+*** Author : Hongyi Shen
+*******************************************************************************
+
+* Usage
+- `make` to compile
+- ./tcp source_file target_place
+- ./tcpm source_file target_place 
+ 
+* Todo
+- Modify tcpm.c, use buffer instead of map memory directly.
+- tcp and tcpm only support regular files and directories.

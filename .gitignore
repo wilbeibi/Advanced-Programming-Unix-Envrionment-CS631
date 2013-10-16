@@ -1,3 +1,6 @@
+# My ignore
+*.~
+
 # Object files
 *.o
 *.ko

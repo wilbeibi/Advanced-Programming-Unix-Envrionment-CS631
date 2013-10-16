@@ -1,0 +1,154 @@
+#+TITLE: CS631 HW1
+#+AUTHOR: Wilbeibi
+#+EMAIL: wilbeibi AT gmail DOT com
+#+LANGUAGE:  en
+#+OPTIONS:   H:2 num:nil toc:t \n:nil @:t ::t |:t ^:nil f:t *:t TeX:t LaTeX:t skip:nil p:nil
+
+* Command /mv/ & /test/ in Linux/NetBSD
+** How I retrieved the source code
+   Considering that I use Mac, with BSD's standard commands, I
+   retrieved the source code from  [[http://lingrok.org/xref/coreutils/src/][Linux SRC]] and [[http://nxr.netbsd.org/xref/src/bin/][NetBSD SRC]] instead
+   of searching them in my own machine.
+** Similarities & Differences 
+   - Basic Info 
+     | Title           | Linux          | NetBSD   |
+     |-----------------+----------------+----------|
+     | License         | GPL            | BSD      |
+     | Version Control | Git            | CVS      |
+     | mv Options      | bfinStTuvhv... | only fiv |
+     | test Options    | Same           | Same     |
+     |-----------------+----------------+----------|
+
+   - Coupling
+     It seems like NetBSD is more loosing coupled than Linux.
+     Linux placed all commands' source code in /coreutils/ while
+     NetBSD gives each command a folder with .1 file and individual
+     Makefile. In most cases, we treat "loosing coupled" as equal as
+     acwise choice. But in this specific condition, put them together maybe a 
+     good way to prevent reinventing the wheels. 
+
+   - Comment
+     Linux code is well commented and provide enough information for
+     us to understand what the code said, while NetBSD ...Ooops, a little bit
+     hard to understand.
+
+   - Style
+     NetBSD's code is more conscise ( maybe due to its limited
+     options) and more obscured than Linux. It seems that NetBSD's
+     naming scheme has a slightly different from Linux. In Linux's code, it is
+     easy to guess the meaning of varibles while NetBSD is not. 
+     Personally, I prefer Linux's style.
+** mv
+*** Why mv
+    /mv/ is an interesting command because it can used to move
+    files/directories or rename things. It's a file operation so it
+    should be related to /stat/, or inode stuffs. It might borrowed something
+    from command /cp/ and /rm/. 
+     
+*** A deeper look at two programs
+    - Linux version's code use Macro definition to save program's name
+      and authors' names. It also defined several global variables and
+      static structures, while NetBSD is much more concise in this
+      part. What's more, NetBSD separate functions' declarations and
+      definitions apart, which help readers to clarify the structure.
+     
+    - The ideas behind two programs are same: *remove destination path,
+      copy files/directories, remove source files.* General steps of
+      Linux /mv/: Initialize, Parse options, Check whether operands are 
+      legal or not, Handle multiple files problem with hash table, move
+      files. While NetBSD parse options first, then handle with
+      different conditions, if the file is regular file, use /fastcopy/
+      function, else, use /copy/ function.
+
+    - Linux /mv/ use /rm/ and /cp/, hide some details of implementation,
+      while NetBSD, the loosing coupled one, utilize File IO
+      operations, create processes to copy files (/vfork/).
+
+** test
+*** Why test
+    Once upon a time I got confused by "[" in shell script, then I
+    found that it is test command, a swiss army knife like command in
+    shell. Given that it support so many uses, it should be complicate
+    or maybe orgranized in structure. Actually it does, the code of
+    /test/ remind me of Stroustrup's caculator program, well designed
+    and elegent.
+
+*** A deeper look at two programs
+    - NetBSD's comment, IIRC, gives a lexical analyzer like
+      explanation, about how /test/ command works. We can clearly
+      understand the priority of each expression or operand through this
+      comment:
+      #+BEGIN_SRC C
+      /* test(1) accepts the following grammar:
+       
+      oexpr	::= aexpr | aexpr "-o" oexpr ;
+      aexpr	::= nexpr | nexpr "-a" aexpr ;
+      nexpr	::= primary | "!" primary
+      primary	::= unary-operator operand
+       	| operand binary-operator operand
+       	| operand
+       	| "(" oexpr ")"
+       	;
+      unary-operator ::= "-r"|"-w"|"-x"|"-f"|"-d"|"-c"|"-b"|"-p"|
+       	"-u"|"-g"|"-k"|"-s"|"-t"|"-z"|"-n"|"-o"|"-O"|"-G"|"-L"|"-S";
+       
+      binary-operator ::= "="|"!="|"-eq"|"-ne"|"-ge"|"-gt"|"-le"|"-lt"|
+       		"-nt"|"-ot"|"-ef";
+      operand ::= <any legal UNIX file name>
+      */
+      #+END_SRC
+
+    - Due to the complexity of operands, /getopt()/ is inappropriate
+      here. Both two use pointers to implement that. Pointers always
+      dangerous, so they use error detect.
+
+    - The source code involves a lot of logical caculation so both
+      version contains some bitwise operations.
+
+    - Both two use /stat()/ to get files' information. /stat/ might
+      be the system call of inode. In this command, /mtime/
+      (modification time) is used to compare the update time between files.
+
+    - NetBSD's code indicates that the disadvantage of /access()/
+      function and the ambiguous information IEEE POSIX
+      provided. On the other hand, Linux use /euidaccess()/ solved
+      this problem.
+
+
+* Reference While Doing Homework
+  - [[http://www.freebsd.org/doc/en/articles/explaining-bsd/comparing-bsd-and-linux.html][Comparing BSD and Linux]]
+  - [[http://lingrok.org/xref/coreutils/src/][Linux SRC]]
+  - [[http://nxr.netbsd.org/xref/src/bin/][NetBSD SRC]]
+  - [[http://www.freebsd.org/cgi/man.cgi?lint][LINT(1)]]
+  - isatty
+  - strace (dtruss in Mac OSX)
+  - vfork
+  - unlink
+  - [[http://www.ibm.com/developerworks/aix/library/au-unix-getopt.html#author1][Command-line processing with getopt()]]
+  - [[linux-driver-core/tools/perf/util/quote.c][quote.c]]
+  - [[http://wiki.bash-hackers.org/commands/classictest][The classic test command]] 
+  - [[http://www.cprogramming.com/tutorial/lesson17.html][Functions with Variable Argument Lists in C and C++ using va_list]]
+  - euidaccess
+  - time.h
+  - Code folding & Function call call graphs are useful when reading source
+  - [[http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html][Shell Command Language]] 
+  - ...
+* Questoins or TODOs
+  - What are .1 file for? SLOVED
+  - How do the code handle Regex? SLOVED
+  - Implementation of /getopt()/, deal continous option ( like -fiv ==
+    -f -i -v)  SLOVED
+  - Linux code is more rubost than NetBSD ? IN SOME WAYS
+  - Take a look at bash source code (sm_loop.c, command.h, subset,
+    parse and smatch.c) TODO
+  - [[http://www.ibm.com/developerworks/library/l-graphvis/][Visualize function calls with Graphviz]] TODO
+    
+
+
+
+
+
+
+
+
+
