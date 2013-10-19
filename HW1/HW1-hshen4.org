@@ -4,6 +4,15 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:2 num:nil toc:t \n:nil @:t ::t |:t ^:nil f:t *:t TeX:t LaTeX:t skip:nil p:nil
 
+* Requirements
+The objective of this assignment is for you to get used to read (and
+understand!) code. To this end, please take a look at the NetBSD
+source code for programs installed under /bin, pick two programs of
+your liking and inspect the code. Then, read the corresponding code of
+the same programs in Linux or Open Solaris Illumos. Compare the
+different implementations. What do they have in common? What makes
+them different?
+
 * Command /mv/ & /test/ in Linux/NetBSD
 ** How I retrieved the source code
    Considering that I use Mac, with BSD's standard commands, I
