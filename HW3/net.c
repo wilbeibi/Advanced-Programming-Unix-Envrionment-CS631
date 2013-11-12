@@ -29,7 +29,7 @@ int server_listen( Arg_t *optInfo){
     int ignore = 1;
     
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_UNSPEC; /* Should support IPv6 */
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; 
     if(optInfo->ipAddr == NULL){
@@ -56,6 +56,7 @@ int server_listen( Arg_t *optInfo){
 	
 	/* Communicate with client */
 	if( (childpid = fork()) == 0){
+	    Close(listenfd);
 	    char readbuf[SIZE];
 	    Inet_ntop(AF_INET, &ipAddr, ipstr, INET_ADDRSTRLEN); /* Get client address in ipstr */
 	    while(Read(connfd, readbuf, SIZE) > 0){
